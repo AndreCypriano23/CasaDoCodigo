@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CasaDoCodigo.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +32,8 @@ namespace CasaDoCodigo
             );
 
             //Instancia que vai existir somente quando os objetos que usam essa instância estará ativo
-            services.AddTransient<DataService>();
+            services.AddTransient<IDataService, DataService>();
+            services.AddTransient<IProdutoRepository, ProdutoRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,24 +59,8 @@ namespace CasaDoCodigo
                     template: "{controller=Pedido}/{action=Carrossel}/{id?}");
             });
 
-            serviceProvider.GetService<DataService>().InicializaDB();
+            serviceProvider.GetService<IDataService>().InicializaDB();
                    
-        }
-    }
-
-    class DataService
-    {
-        private readonly ApplicationContext contexto;
-
-        public DataService(ApplicationContext contexto)
-        {
-            this.contexto = contexto;
-        }
-
-        public void InicializaDB()
-        {
-            //Ele vai criar o BD se necessário
-            contexto.Database.EnsureCreated();
         }
     }
 }
