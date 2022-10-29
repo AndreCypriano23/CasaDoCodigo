@@ -34,6 +34,9 @@ namespace CasaDoCodigo
             //Instancia que vai existir somente quando os objetos que usam essa instância estará ativo
             services.AddTransient<IDataService, DataService>();
             services.AddTransient<IProdutoRepository, ProdutoRepository>();
+            services.AddTransient<IPedidoRepository, PedidoRepository>();
+            services.AddTransient<ICadastroRepository, CadastroRepository>();
+            services.AddTransient<IItemPedidoRepository, ItemPedidoRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,7 +59,7 @@ namespace CasaDoCodigo
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Pedido}/{action=Carrossel}/{id?}");
+                    template: "{controller=Pedido}/{action=Carrossel}/{codigo?}");
             });
 
             serviceProvider.GetService<IDataService>().InicializaDB();

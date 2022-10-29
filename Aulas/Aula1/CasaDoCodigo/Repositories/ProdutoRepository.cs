@@ -1,4 +1,5 @@
 ﻿using CasaDoCodigo.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,18 +7,18 @@ using System.Threading.Tasks;
 
 namespace CasaDoCodigo.Repositories
 {
-    public class ProdutoRepository : IProdutoRepository
+    public class ProdutoRepository : BaseRepository<Produto>, IProdutoRepository
     {
-        private readonly ApplicationContext contexto;
 
-        public ProdutoRepository(ApplicationContext contexto)
+        public ProdutoRepository(ApplicationContext contexto) : base(contexto)
         {
-            this.contexto = contexto;
+
         }
+
 
         public IList<Produto> GetProdutos()
         {
-            return contexto.Set<Produto>().ToList();//Retorna uma lista a partir do DbSet
+            return dbSet.ToList();//Retorna uma lista a partir do DbSet
         }
 
         public void SaveProdutos(List<Livro> livros)
@@ -25,9 +26,15 @@ namespace CasaDoCodigo.Repositories
             //salvar no banco cada livro
             foreach (var livro in livros)
             {
-                //vamos acessar a tabela do banco de dados
-                contexto.Set<Produto>().Add(new Produto(livro.Codigo, livro.Nome, livro.Preco));
-                //mas agora ele só add no set de produtos, que é add info em memória, nao foi mandado p o banco
+                //Filtro para evitar duplicação
+                
+                if (!dbSet.Where(p => p.Codigo == livro.Codigo).Any())//Se não tiver produto
+                {
+                    //vamos acessar a tabela do banco de dados
+                    dbSet.Add(new Produto(livro.Codigo, livro.Nome, livro.Preco));
+                   //mas agora ele só add no set de produtos, que é add info em memória, nao foi mandado p o banco
+                }
+
             }
         }
 
