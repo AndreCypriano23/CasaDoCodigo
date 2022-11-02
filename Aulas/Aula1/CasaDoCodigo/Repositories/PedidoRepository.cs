@@ -1,5 +1,6 @@
 ﻿using CasaDoCodigo.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,7 +38,7 @@ namespace CasaDoCodigo.Repositories
             var pedido = GetPedido();
             var itemPedido = contexto.Set<ItemPedido>()
               .Where(i => i.Produto.Codigo == codigo && i.Pedido.Id == pedido.Id)
-              .SingleOrDefault();
+              .SingleOrDefault(); 
 
             if(itemPedido == null)
             {
@@ -54,7 +55,10 @@ namespace CasaDoCodigo.Repositories
         {
             //Obter o Pedido Atual. Primeiro passo, saber qual é o Id do pedido que está gravado na sessao
             var pedidoId = GetPedidoId();
-            var pedido = dbSet.Where(p => p.Id == pedidoId).SingleOrDefault();
+            var pedido = dbSet
+                .Include(p => p.Itens)//Aqui é como se fosse um join no SQL Server
+                    .ThenInclude(i => i.Produto) //Incluir em seguida
+                .Where(p => p.Id == pedidoId).SingleOrDefault();
             //Igual ao Id da sessao. O SingleOrDefault retorna o valor ou um nulo se nao tiver, sem dar um erro
                 
             if(pedido == null)
