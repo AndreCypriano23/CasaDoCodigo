@@ -1,4 +1,5 @@
 ﻿using CasaDoCodigo.Models;
+using CasaDoCodigo.Models.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,16 +13,19 @@ namespace CasaDoCodigo.Repositories
     {
         Pedido GetPedido();
         void AddItem(string codigo);
+        UpdateQuantidadeResponse UpdateQuantidade(ItemPedido itemPedido);
     }
 
     public class PedidoRepository : BaseRepository<Pedido>, IPedidoRepository
     {
         private readonly IHttpContextAccessor _contextAccessor;
+        private readonly IItemPedidoRepository _itemPedidoRepository;
 
-        public PedidoRepository(ApplicationContext contexto, IHttpContextAccessor contextAccessor)
+        public PedidoRepository(ApplicationContext contexto, IHttpContextAccessor contextAccessor, IItemPedidoRepository itemPedidoRepository)
             : base(contexto)
         {
             this._contextAccessor = contextAccessor;
+            this._itemPedidoRepository = itemPedidoRepository;
         }
 
         public void AddItem(string codigo)
@@ -82,6 +86,30 @@ namespace CasaDoCodigo.Repositories
         private void SetPedidoId(int pedidoId)
         {
             _contextAccessor.HttpContext.Session.SetInt32("pedidoId", pedidoId);//Gravando 
+        }
+
+        public UpdateQuantidadeResponse UpdateQuantidade(ItemPedido itemPedido)
+        {
+            //Aqui vamos retornar nao só o item que esta endo alterado mas o carrinhoViewModeltbm
+
+            //Vamos chamar um repositório a partir do outro injetando independencia lá em cima
+            var itemPedidoDB = _itemPedidoRepository.GetItemPedido(itemPedido.Id);
+
+            if (itemPedidoDB != null)
+            {
+                /* Aqui estava dando erro de não poder modificar a quantidade pq o set dele é privado, então fiz um método para poder alterar isso 
+                itemPedidoDB.AtualizaQuantidade(itemPedido.Quantidade) = itemPedido.Quantidade;*/
+                itemPedidoDB.AtualizaQuantidade(itemPedido.Quantidade);
+
+                contexto.SaveChanges();
+
+                //Passar os itens do carrinho 
+                var carrinhoViewModel = new CarrinhoViewModel(GetPedido().Itens);
+
+                return new UpdateQuantidadeResponse(itemPedidoDB, carrinhoViewModel);
+            }
+
+            throw new ArgumentException("Item Pedido não encontrado");
         }
 
     }

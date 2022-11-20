@@ -8,8 +8,7 @@ namespace CasaDoCodigo.Repositories
 {
     public interface IItemPedidoRepository
     {
-        void UpdateQuantidade(ItemPedido itemPedido);
-       
+        ItemPedido GetItemPedido(int itemPedidoId);
     }
 
     public class ItemPedidoRepository : BaseRepository<ItemPedido>, IItemPedidoRepository
@@ -18,20 +17,13 @@ namespace CasaDoCodigo.Repositories
         {
 
         }
+        //Método para obter somente o item apartir do id 
 
-        public void UpdateQuantidade(ItemPedido itemPedido)
+        public ItemPedido GetItemPedido(int itemPedidoId)
         {
-            var itemPedidoDB = dbSet.
-                Where(ip => ip.Id == itemPedido.Id).FirstOrDefault();
-        
-            if(itemPedidoDB != null)
-            {
-                /* Aqui estava dando erro de não poder modificar a quantidade pq o set dele é privado, então fiz um método para poder alterar isso 
-                itemPedidoDB.AtualizaQuantidade(itemPedido.Quantidade) = itemPedido.Quantidade;*/
-                itemPedidoDB.AtualizaQuantidade(itemPedido.Quantidade);
-
-                contexto.SaveChanges();
-            }
+            return dbSet.
+              Where(ip => ip.Id == itemPedidoId).FirstOrDefault();
         }
+
     }
 }

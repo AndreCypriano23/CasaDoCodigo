@@ -49,6 +49,9 @@ class Carrinho {
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify(data) /*Transformei o objeto data em string */
+        }).done(function (response) {
+            //Código de refresh da página e atualizar os dados em tempo real, sem ter que dar F5
+            
         });
 
     }
